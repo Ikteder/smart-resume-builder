@@ -248,13 +248,13 @@ export function ResumeStudio() {
             </div>
           </div>
 
-          <div className="grid gap-6 2xl:grid-cols-[minmax(440px,680px)_1fr]">
-            <div className={mobileMode === "preview" ? "hidden 2xl:block" : "block"}>
+          <div className="grid min-h-0 gap-6 2xl:grid-cols-[minmax(420px,620px)_minmax(0,1fr)]">
+            <div className={mobileMode === "preview" ? "hidden min-w-0 2xl:block" : "block min-w-0"}>
               <ResumeForm data={resume} onChange={setResume} />
             </div>
-            <aside className={mobileMode === "edit" ? "hidden 2xl:block" : "block"}>
-              <div className="sticky top-28 flex justify-center overflow-auto rounded-lg border border-slate-200 bg-slate-200 p-4 dark:border-slate-800 dark:bg-slate-900">
-                <div className="origin-top scale-[0.54] sm:scale-[0.72] lg:scale-[0.67] xl:scale-[0.8] 2xl:scale-90">
+            <aside className={mobileMode === "edit" ? "hidden min-w-0 2xl:block" : "block min-w-0"}>
+              <div className="sticky top-28 max-h-[calc(100vh-8rem)] min-w-0 overflow-auto overscroll-contain rounded-lg border border-slate-200 bg-slate-200 p-4 dark:border-slate-800 dark:bg-slate-900">
+                <div className="mx-auto w-[8.5in] origin-top scale-[0.54] sm:scale-[0.72] lg:scale-[0.67] xl:scale-[0.8] 2xl:scale-[0.82]">
                   <ResumePreview data={resume} previewRef={previewRef} />
                 </div>
               </div>
