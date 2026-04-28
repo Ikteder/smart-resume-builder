@@ -34,6 +34,8 @@ function isOriginalSample(data: ResumeData) {
   return JSON.stringify(data) === JSON.stringify(sampleResume);
 }
 
+const THEME_STORAGE_KEY = "smart-resume-theme";
+
 export function ResumeStudio() {
   const [resume, setResume] = useState<ResumeData>(emptyResume);
   const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
@@ -50,6 +52,8 @@ export function ResumeStudio() {
       clearStoredResume();
       setStatus("Blank resume ready");
     }
+
+    setDarkMode(window.localStorage.getItem(THEME_STORAGE_KEY) === "dark");
   }, []);
 
   useEffect(() => {
@@ -136,6 +140,12 @@ export function ResumeStudio() {
   function loadSampleResume() {
     setResume(sampleResume);
     setStatus("Sample resume loaded");
+  }
+
+  function toggleDarkMode() {
+    const nextDarkMode = !darkMode;
+    setDarkMode(nextDarkMode);
+    window.localStorage.setItem(THEME_STORAGE_KEY, nextDarkMode ? "dark" : "light");
   }
 
   return (
@@ -238,7 +248,7 @@ export function ResumeStudio() {
                   Import
                   <input type="file" accept="application/json" className="hidden" onChange={importJson} />
                 </label>
-                <Button type="button" variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} title="Toggle dark mode">
+                <Button type="button" variant="ghost" size="icon" onClick={toggleDarkMode} title="Toggle dark mode">
                   {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
                 <Button type="button" variant="ghost" size="icon" onClick={clearData} title="Clear data">
