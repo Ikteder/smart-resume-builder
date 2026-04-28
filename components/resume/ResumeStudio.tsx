@@ -17,7 +17,7 @@ import {
 import { ResumeForm } from "@/components/forms/ResumeForm";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { Button } from "@/components/ui/button";
-import { sampleResume } from "@/data/sample-resume";
+import { emptyResume, sampleResume } from "@/data/sample-resume";
 import { exportResumeDocx } from "@/lib/docx-export";
 import { clearStoredResume, loadResumeFromStorage, saveResumeToStorage } from "@/lib/storage";
 import type { ResumeData } from "@/types/resume";
@@ -30,18 +30,25 @@ function fileName(data: ResumeData, extension: string) {
   return `${base || "resume"}.${extension}`;
 }
 
+function isOriginalSample(data: ResumeData) {
+  return JSON.stringify(data) === JSON.stringify(sampleResume);
+}
+
 export function ResumeStudio() {
-  const [resume, setResume] = useState<ResumeData>(sampleResume);
+  const [resume, setResume] = useState<ResumeData>(emptyResume);
   const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
   const [darkMode, setDarkMode] = useState(false);
-  const [status, setStatus] = useState("Sample resume loaded");
+  const [status, setStatus] = useState("Blank resume ready");
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = loadResumeFromStorage();
-    if (stored) {
+    if (stored && !isOriginalSample(stored)) {
       setResume(stored);
       setStatus("Restored saved progress");
+    } else if (stored) {
+      clearStoredResume();
+      setStatus("Blank resume ready");
     }
   }, []);
 
@@ -122,8 +129,13 @@ export function ResumeStudio() {
     const confirmed = window.confirm("Clear all resume data from this browser?");
     if (!confirmed) return;
     clearStoredResume();
+    setResume(emptyResume);
+    setStatus("Local data cleared; blank resume ready");
+  }
+
+  function loadSampleResume() {
     setResume(sampleResume);
-    setStatus("Local data cleared; sample resume reloaded");
+    setStatus("Sample resume loaded");
   }
 
   return (
@@ -149,7 +161,7 @@ export function ResumeStudio() {
                 <Button type="button" onClick={() => document.getElementById("builder")?.scrollIntoView()}>
                   Start Building
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setResume(sampleResume)}>
+                <Button type="button" variant="outline" onClick={loadSampleResume}>
                   <RotateCcw className="h-4 w-4" />
                   Load sample resume
                 </Button>
@@ -189,7 +201,7 @@ export function ResumeStudio() {
                 <p className="text-xs text-slate-500">Autosaves locally in this browser. No login required.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex rounded-md border border-slate-300 bg-white p-1 lg:hidden dark:border-slate-700 dark:bg-slate-900">
+                <div className="flex rounded-md border border-slate-300 bg-white p-1 2xl:hidden dark:border-slate-700 dark:bg-slate-900">
                   <button
                     type="button"
                     onClick={() => setMobileMode("edit")}
@@ -236,11 +248,11 @@ export function ResumeStudio() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(440px,680px)_1fr]">
-            <div className={mobileMode === "preview" ? "hidden lg:block" : "block"}>
+          <div className="grid gap-6 2xl:grid-cols-[minmax(440px,680px)_1fr]">
+            <div className={mobileMode === "preview" ? "hidden 2xl:block" : "block"}>
               <ResumeForm data={resume} onChange={setResume} />
             </div>
-            <aside className={mobileMode === "edit" ? "hidden lg:block" : "block"}>
+            <aside className={mobileMode === "edit" ? "hidden 2xl:block" : "block"}>
               <div className="sticky top-28 flex justify-center overflow-auto rounded-lg border border-slate-200 bg-slate-200 p-4 dark:border-slate-800 dark:bg-slate-900">
                 <div className="origin-top scale-[0.54] sm:scale-[0.72] lg:scale-[0.67] xl:scale-[0.8] 2xl:scale-90">
                   <ResumePreview data={resume} previewRef={previewRef} />
