@@ -201,7 +201,7 @@ export function ResumeStudio() {
                 <p className="text-xs text-slate-500">Autosaves locally in this browser. No login required.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex rounded-md border border-slate-300 bg-white p-1 2xl:hidden dark:border-slate-700 dark:bg-slate-900">
+                <div className="flex rounded-md border border-slate-300 bg-white p-1 min-[1800px]:hidden dark:border-slate-700 dark:bg-slate-900">
                   <button
                     type="button"
                     onClick={() => setMobileMode("edit")}
@@ -248,11 +248,11 @@ export function ResumeStudio() {
             </div>
           </div>
 
-          <div className="grid min-h-0 gap-6 2xl:grid-cols-[minmax(420px,620px)_minmax(0,1fr)]">
-            <div className={mobileMode === "preview" ? "hidden min-w-0 2xl:block" : "block min-w-0"}>
+          <div className="grid min-h-0 gap-6 min-[1800px]:grid-cols-[minmax(420px,620px)_minmax(0,1fr)]">
+            <div className={mobileMode === "preview" ? "hidden min-w-0 min-[1800px]:block" : "block min-w-0"}>
               <ResumeForm data={resume} onChange={setResume} />
             </div>
-            <aside className={mobileMode === "edit" ? "hidden min-w-0 2xl:block" : "block min-w-0"}>
+            <aside className={mobileMode === "edit" ? "hidden min-w-0 min-[1800px]:block" : "block min-w-0"}>
               <div className="sticky top-28 max-h-[calc(100vh-8rem)] min-w-0 overflow-auto overscroll-contain rounded-lg border border-slate-200 bg-slate-200 p-4 dark:border-slate-800 dark:bg-slate-900">
                 <div className="mx-auto w-[8.5in] origin-top scale-[0.54] sm:scale-[0.72] lg:scale-[0.67] xl:scale-[0.8] 2xl:scale-[0.82]">
                   <ResumePreview data={resume} previewRef={previewRef} />
