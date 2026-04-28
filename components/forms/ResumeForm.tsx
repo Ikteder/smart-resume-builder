@@ -1,8 +1,10 @@
 "use client";
 
+import * as React from "react";
 import {
   ArrowDown,
   ArrowUp,
+  BriefcaseBusiness,
   Eye,
   EyeOff,
   GripVertical,
@@ -14,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { createId } from "@/lib/ids";
+import { analyzeJobDescription, applyTailoringDraft } from "@/lib/job-tailor";
 import { isValidEmail, isValidUrl, joinLines, splitLines } from "@/lib/utils";
 import type {
   CustomSection,
@@ -87,6 +90,128 @@ function SectionShell({
         {aside}
       </CardHeader>
       <CardBody className="grid gap-4">{children}</CardBody>
+    </Card>
+  );
+}
+
+function PillList({ items, emptyText }: { items: string[]; emptyText: string }) {
+  if (!items.length) {
+    return <p className="text-sm text-slate-500 dark:text-slate-400">{emptyText}</p>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span
+          key={item}
+          className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function JobTailorSection({ data, onChange }: ResumeFormProps) {
+  const [jobDescription, setJobDescription] = React.useState("");
+  const analysis = React.useMemo(
+    () => (jobDescription.trim().length > 40 ? analyzeJobDescription(data, jobDescription) : null),
+    [data, jobDescription],
+  );
+
+  return (
+    <Card className="border-cyan-200 dark:border-cyan-900">
+      <CardHeader className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-950 dark:text-white">
+            <BriefcaseBusiness className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />
+            Target a Job Description
+          </h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Paste a role description to rank your existing qualifications and apply a grounded tailoring pass.
+          </p>
+        </div>
+        {analysis ? (
+          <div className="rounded-md bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-900 dark:bg-cyan-950 dark:text-cyan-100">
+            {analysis.score}% keyword coverage
+          </div>
+        ) : null}
+      </CardHeader>
+      <CardBody className="grid gap-4">
+        <Field label="Job description">
+          <Textarea
+            value={jobDescription}
+            onChange={(event) => setJobDescription(event.target.value)}
+            placeholder="Paste the internship, research, or software engineering role description here..."
+            className="min-h-40"
+          />
+        </Field>
+
+        {analysis ? (
+          <div className="grid gap-4">
+            <div className="grid gap-4 xl:grid-cols-2">
+              <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  Matched qualifications
+                </h4>
+                <PillList items={analysis.matchedKeywords.slice(0, 14)} emptyText="No direct keyword matches yet." />
+              </div>
+              <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  Keywords not found
+                </h4>
+                <PillList
+                  items={analysis.missingKeywords.slice(0, 14)}
+                  emptyText="No major missing keywords detected."
+                />
+              </div>
+            </div>
+
+            <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                Strongest existing evidence
+              </h4>
+              {analysis.relevantBullets.length ? (
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600 dark:text-slate-300">
+                  {analysis.relevantBullets.slice(0, 5).map((bullet) => (
+                    <li key={`${bullet.source}-${bullet.text}`}>
+                      <span className="font-medium text-slate-800 dark:text-slate-100">{bullet.source}: </span>
+                      {bullet.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  Add more resume bullets or paste a more detailed job description.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-md border border-cyan-200 bg-cyan-50 p-4 dark:border-cyan-900 dark:bg-cyan-950">
+              <h4 className="text-sm font-semibold text-cyan-950 dark:text-cyan-100">
+                Tailored summary draft
+              </h4>
+              <p className="mt-2 text-sm leading-6 text-cyan-950 dark:text-cyan-100">
+                {analysis.draft.summary}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button type="button" variant="secondary" onClick={() => onChange(applyTailoringDraft(data, analysis))}>
+                Apply safe tailoring
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setJobDescription("")}>
+                Clear job description
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="rounded-md border border-dashed border-slate-300 p-4 text-sm text-slate-500 dark:border-slate-700">
+            Paste at least a few lines from a job description to see matches, missing keywords, and a tailored draft.
+          </p>
+        )}
+      </CardBody>
     </Card>
   );
 }
@@ -685,6 +810,8 @@ export function ResumeForm({ data, onChange }: ResumeFormProps) {
 
   return (
     <div className="grid gap-5">
+      <JobTailorSection data={data} onChange={onChange} />
+
       <SectionShell title="Basics">
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="Full name">

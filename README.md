@@ -20,6 +20,7 @@ A polished, production-quality resume builder built with Next.js, TypeScript, Ta
 - Clear data confirmation and one-click sample resume loading.
 - Accent color selector, font selector, ATS mode, and dark mode for the app UI.
 - Resume writing helpers with action verbs, bullet examples, ATS tips, and content-length guidance.
+- Job description tailoring that analyzes a pasted role description, matches it against the user's existing qualifications, and applies grounded resume updates without inventing experience.
 - Realistic sample profile for Ikteder Akhand Udoy, a CS PhD student focused on ML, computer vision, efficient AI, quantization, LLM systems, and hardware-aware deep learning.
 
 ## Tech Stack
@@ -31,6 +32,7 @@ A polished, production-quality resume builder built with Next.js, TypeScript, Ta
 - `html2pdf.js` for browser PDF export
 - `docx` and `file-saver` for DOCX export
 - Local browser storage, no login, no backend, no paid APIs
+- Local job-description keyword matching and safe tailoring heuristics
 - ESLint and Prettier
 
 ## Local Installation
