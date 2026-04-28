@@ -5,8 +5,10 @@ import {
   ArrowDown,
   ArrowUp,
   BriefcaseBusiness,
+  ClipboardCheck,
   Eye,
   EyeOff,
+  FileUp,
   GripVertical,
   Plus,
   Trash2,
@@ -17,6 +19,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { createId } from "@/lib/ids";
 import { analyzeJobDescription, applyTailoringDraft } from "@/lib/job-tailor";
+import { buildResumeFromText } from "@/lib/resume-parser";
 import { isValidEmail, isValidUrl, joinLines, splitLines } from "@/lib/utils";
 import type {
   CustomSection,
@@ -110,6 +113,112 @@ function PillList({ items, emptyText }: { items: string[]; emptyText: string }) 
         </span>
       ))}
     </div>
+  );
+}
+
+function OldResumeIntakeSection({ data, onChange }: ResumeFormProps) {
+  const [resumeText, setResumeText] = React.useState("");
+  const [jobDescription, setJobDescription] = React.useState("");
+  const [status, setStatus] = React.useState("");
+
+  async function uploadTextFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    setResumeText(text);
+    setStatus(`Loaded ${file.name}. Review the extracted text, then build the resume.`);
+    event.target.value = "";
+  }
+
+  function buildFromOldResume(shouldTailor: boolean) {
+    if (resumeText.trim().length < 40) {
+      setStatus("Paste more resume text before importing.");
+      return;
+    }
+
+    const nextResume = buildResumeFromText(resumeText, {
+      base: data,
+      jobDescription: shouldTailor ? jobDescription : "",
+    });
+    onChange(nextResume);
+    setStatus(
+      shouldTailor && jobDescription.trim()
+        ? "Imported old resume and applied job-description tailoring."
+        : "Imported old resume into the builder.",
+    );
+  }
+
+  return (
+    <Card className="border-emerald-200 dark:border-emerald-900">
+      <CardHeader className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-950 dark:text-white">
+            <ClipboardCheck className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />
+            Build from Old Resume
+          </h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Paste your existing resume text, optionally add a job description, and generate a structured draft
+            without inventing qualifications.
+          </p>
+        </div>
+        <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+          <FileUp className="h-4 w-4" />
+          Upload TXT/MD
+          <input type="file" accept=".txt,.md,text/plain,text/markdown" className="hidden" onChange={uploadTextFile} />
+        </label>
+      </CardHeader>
+      <CardBody className="grid gap-4">
+        <Field label="Old resume text" hint={`${resumeText.length} characters parsed locally in your browser.`}>
+          <Textarea
+            value={resumeText}
+            onChange={(event) => setResumeText(event.target.value)}
+            placeholder="Paste the text from your old resume here. Standard headings like Education, Experience, Projects, Skills, Publications, Awards, and Leadership work best."
+            className="min-h-48"
+          />
+        </Field>
+
+        <Field label="Job description for this import" hint="Optional; use this to reorder evidence and draft a targeted summary.">
+          <Textarea
+            value={jobDescription}
+            onChange={(event) => setJobDescription(event.target.value)}
+            placeholder="Paste the target job description here if you want the imported resume tailored immediately..."
+            className="min-h-32"
+          />
+        </Field>
+
+        <div className="rounded-md border border-dashed border-emerald-300 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+          For PDF or DOCX resumes, open the file, copy all text, and paste it here. Direct PDF/DOCX parsing can
+          be added later, but this version avoids extra dependencies and keeps everything local.
+        </div>
+
+        {status ? <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{status}</p> : null}
+
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="secondary" onClick={() => buildFromOldResume(false)}>
+            Build from old resume
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => buildFromOldResume(true)}
+            disabled={!jobDescription.trim()}
+          >
+            Build and tailor to job
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setResumeText("");
+              setJobDescription("");
+              setStatus("");
+            }}
+          >
+            Clear intake
+          </Button>
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -810,6 +919,7 @@ export function ResumeForm({ data, onChange }: ResumeFormProps) {
 
   return (
     <div className="grid gap-5">
+      <OldResumeIntakeSection data={data} onChange={onChange} />
       <JobTailorSection data={data} onChange={onChange} />
 
       <SectionShell title="Basics">
