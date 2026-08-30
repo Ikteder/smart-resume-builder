@@ -1,10 +1,10 @@
 # AI Resume Builder / Smart Resume Studio
 
+[![CI](https://github.com/Ikteder/smart-resume-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/Ikteder/smart-resume-builder/actions/workflows/ci.yml)
+
 A polished, production-quality resume builder built with Next.js, TypeScript, Tailwind CSS, local browser storage, PDF export, and DOCX export. The app is designed for internship, research, PhD, and software engineering applications, with professional templates that stay readable, printable, and ATS-friendly.
 
-![Smart Resume Studio screenshot placeholder](./docs/screenshot-placeholder.svg)
-
-> Screenshot note: run the app locally, open `http://127.0.0.1:3000`, and capture the builder plus live preview for the repository image.
+![Smart Resume Studio with the bundled sample resume loaded](./docs/smart-resume-studio.png)
 
 ## Features
 
